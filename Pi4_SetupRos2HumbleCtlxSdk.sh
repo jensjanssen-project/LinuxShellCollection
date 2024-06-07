@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Setup & enable SSH
+sudo apt update
+sudo apt install openssh-server
+sudo systemctl enable ssh
+sudo systemctl start ssh
+sudo ufw allow ssh
+sudo ufw enable
+sudo ufw status
+
+
 # Function to modify /etc/apt/sources.list to replace amd64 with arm64
 modify_sources_list() {
     sudo sed -i 's/amd64/arm64/g' /etc/apt/sources.list
