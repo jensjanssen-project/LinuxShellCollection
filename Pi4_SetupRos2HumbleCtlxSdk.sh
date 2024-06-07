@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Function to modify /etc/apt/sources.list to replace amd64 with arm64
+modify_sources_list() {
+    sudo sed -i 's/amd64/arm64/g' /etc/apt/sources.list
+}
+
+# Modify architecture in sources.list
+modify_sources_list
+
+# Update and upgrade the system
+sudo apt update && sudo apt upgrade -y
+
+# Install openssh-server and enable SSH
+sudo apt install -y openssh-server
+sudo systemctl enable --now ssh
+
+# Download and execute install-required-packages.sh
+wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-required-packages.sh
+chmod a+x install-required-packages.sh
+./install-required-packages.sh
+
+# Download and execute install-snapcraft.sh
+wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-snapcraft.sh
+chmod a+x install-snapcraft.sh
+./install-snapcraft.sh
+
+# Download and execute clone-install-sdk.sh
+wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/clone-install-sdk.sh
+chmod a+x clone-install-sdk.sh
+./clone-install-sdk.sh
+
+# Install necessary dependencies for ROS2
+sudo apt install -y software-properties-common
+sudo add-apt-repository universe
+sudo apt update && sudo apt install -y curl
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Add ROS2 repository to the sources list
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+# Update and upgrade the system
+sudo apt update
+sudo apt upgrade -y
+
+# Install ROS2 Humble Desktop and ROS Development Tools
+sudo apt install -y ros-humble-desktop ros-dev-tools
+
+# Source the ROS2 environment setup script in .bashrc
+echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+
+# Source the .bashrc file to apply changes
+source ~/.bashrc
+
+# Clone the ctrlx-automation-sdk-ros2 repository
+git clone https://github.com/boschrexroth/ctrlx-automation-sdk-ros2
+
+echo "Setup completed successfully!"
