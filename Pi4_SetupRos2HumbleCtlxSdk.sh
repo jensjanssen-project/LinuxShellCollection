@@ -1,13 +1,33 @@
 #!/bin/bash
 
-# Setup & enable SSH
-sudo apt update
-sudo apt install openssh-server
-sudo systemctl enable ssh
-sudo systemctl start ssh
-sudo ufw allow ssh
-sudo ufw enable
-sudo ufw status
+# Function to prompt the user for input
+ask_for_installation() {
+    echo "Do you want to install and setup SSH? (yes/no) [default: no]"
+    read -r user_input
+    user_input=${user_input:-no}
+
+    if [[ "$user_input" == "yes" ]]; then
+        return 0  # Return 0 for success
+    else
+        return 1  # Return 1 for failure
+    fi
+}
+
+# Main script logic
+if ask_for_installation; then
+    # Setup & enable SSH
+    echo "Setting up SSH..."
+    sudo apt update
+    sudo apt install -y openssh-server
+    sudo systemctl enable ssh
+    sudo systemctl start ssh
+    sudo ufw allow ssh
+    sudo ufw enable
+    sudo ufw status
+    echo "SSH setup complete."
+else
+    echo "SSH setup aborted."
+fi
 
 
 # Function to modify /etc/apt/sources.list to replace amd64 with arm64
