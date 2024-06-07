@@ -41,6 +41,7 @@ sudo apt upgrade -y
 
 # Install ROS2 Humble Desktop and ROS Development Tools
 sudo apt install -y ros-humble-desktop ros-dev-tools
+sudo apt install -y python3-colcon-common-extensions
 
 # Source the ROS2 environment setup script in .bashrc
 echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
