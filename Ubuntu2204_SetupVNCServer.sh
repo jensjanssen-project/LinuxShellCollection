@@ -6,8 +6,7 @@ sudo apt install -y ubuntu-desktop gnome-shell tigervnc-standalone-server gnome-
 
 # Set VNC password
 echo "Setting VNC password..."
-mkdir -p ~/.vnc
-echo -e "pid914511\npid914511\nn" | vncpasswd
+sudo vncpasswd
 
 # Create VNC startup script
 cat << 'EOF' > ~/.vnc/xstartup
