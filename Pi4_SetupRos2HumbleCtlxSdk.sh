@@ -16,34 +16,20 @@ modify_sources_list() {
 }
 
 # Modify architecture in sources.list
-modify_sources_list
+#modify_sources_list
+
 
 # Update and upgrade the system
-sudo apt update && sudo apt upgrade -y
+sudo apt update
+sudo apt upgrade -y
 
-# Install openssh-server and enable SSH
-sudo apt install -y openssh-server
-sudo systemctl enable --now ssh
-
-# Download and execute install-required-packages.sh
-wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-required-packages.sh
-chmod a+x install-required-packages.sh
-./install-required-packages.sh
-
-# Download and execute install-snapcraft.sh
-wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-snapcraft.sh
-chmod a+x install-snapcraft.sh
-./install-snapcraft.sh
-
-# Download and execute clone-install-sdk.sh
-wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/clone-install-sdk.sh
-chmod a+x clone-install-sdk.sh
-./clone-install-sdk.sh
 
 # Install necessary dependencies for ROS2
 sudo apt install -y software-properties-common
 sudo add-apt-repository universe
-sudo apt update && sudo apt install -y curl
+sudo apt update
+sudo apt upgrade -y
+sudo apt install -y curl
 sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
 
 # Add ROS2 repository to the sources list
@@ -63,6 +49,42 @@ echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 source ~/.bashrc
 
 # Clone the ctrlx-automation-sdk-ros2 repository
+cd ~
 git clone https://github.com/boschrexroth/ctrlx-automation-sdk-ros2
+
+# Update and upgrade the system
+sudo apt update
+sudo apt upgrade -y
+
+# Install openssh-server and enable SSH
+sudo apt install -y openssh-server
+sudo systemctl enable --now ssh
+
+# Update and upgrade the system
+sudo apt update
+sudo apt upgrade -y
+
+# Download SDK
+cd ~/Downloads
+wget "https://github.com/boschrexroth/ctrlx-automation-sdk/releases/download/2.6.0/ctrlx-automation-sdk-2.6.0.zip"
+unzip ctrlx-automation-sdk-2.6.0.zip -d ~
+cd ~/ctrlx-automation-sdk/scripts
+
+# Download and execute install-required-packages.sh
+#wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-required-packages.sh
+chmod a+x install-required-packages.sh
+./install-required-packages.sh
+
+# Download and execute install-snapcraft.sh
+#wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-snapcraft.sh
+chmod a+x install-snapcraft.sh
+./install-snapcraft.sh
+
+# Download and execute clone-install-sdk.sh
+#wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/clone-install-sdk.sh
+#chmod a+x clone-install-sdk.sh
+#./clone-install-sdk.sh
+
+cd ~
 
 echo "Setup completed successfully!"
