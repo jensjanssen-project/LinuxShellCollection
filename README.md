@@ -3,4 +3,4 @@ wget "https://github.com/jensjanssen-project/LinuxShellCollection/archive/refs/h
 unzip LinuxShellCollection-main.zip -d ~ \
 cd LinuxShellCollection-main \
 chmod +x Pi4_SetupRos2HumbleCtlxSdk.sh \
-./Pi4_SetupRos2HumbleCtlxSdk.sh \
+./Pi4_SetupRos2HumbleCtlxSdk.sh 
