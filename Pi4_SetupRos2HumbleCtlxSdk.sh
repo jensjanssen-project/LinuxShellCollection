@@ -73,33 +73,26 @@ source ~/.bashrc
 cd ~
 git clone https://github.com/boschrexroth/ctrlx-automation-sdk-ros2
 
-# Update and upgrade the system
-sudo apt update
-sudo apt upgrade -y
-
-# Install openssh-server and enable SSH
-sudo apt install -y openssh-server
-sudo systemctl enable --now ssh
 
 # Update and upgrade the system
 sudo apt update
 sudo apt upgrade -y
 
 # Download SDK
-cd ~
+cd ~/Downloads
 
-#wget "https://github.com/boschrexroth/ctrlx-automation-sdk/releases/download/2.6.0/ctrlx-automation-sdk-2.6.0.zip"
-#unzip ctrlx-automation-sdk-2.6.0.zip -d ~
-#cd ~/ctrlx-automation-sdk/scripts
+wget "https://github.com/boschrexroth/ctrlx-automation-sdk/releases/download/2.6.0/ctrlx-automation-sdk-2.6.0.zip"
+unzip ctrlx-automation-sdk-2.6.0.zip -d ~
+cd ~/ctrlx-automation-sdk/scripts
 
 # Download and execute install-required-packages.sh
-wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-required-packages.sh
-chmod a+x install-required-packages.sh
+#wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-required-packages.sh
+#chmod a+x install-required-packages.sh
 ./install-required-packages.sh
 
 # Download and execute install-snapcraft.sh
-wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-snapcraft.sh
-chmod a+x install-snapcraft.sh
+#wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-snapcraft.sh
+#chmod a+x install-snapcraft.sh
 ./install-snapcraft.sh
 
 # Download and execute clone-install-sdk.sh
