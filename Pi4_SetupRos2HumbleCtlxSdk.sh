@@ -84,8 +84,8 @@ sudo apt upgrade -y
 cd ~
 
 # Clone and install SDK
-sudo chmod +x {WORKING_DIR}/ctrlX_SDK/clone-install-sdk.sh
-{WORKING_DIR}/ctrlX_SDK/clone-install-sdk.sh
+sudo chmod +x ${WORKING_DIR}/ctrlX_SDK/clone-install-sdk.sh
+${WORKING_DIR}/ctrlX_SDK/clone-install-sdk.sh
 
 #wget "https://github.com/boschrexroth/ctrlx-automation-sdk/releases/download/2.6.0/ctrlx-automation-sdk-2.6.0.zip"
 #unzip ctrlx-automation-sdk-2.6.0.zip -d ~

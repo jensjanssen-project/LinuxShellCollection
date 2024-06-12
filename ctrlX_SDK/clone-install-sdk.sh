@@ -109,6 +109,12 @@ chmod a+x bin/comm.datalayer/ubuntu22-gcc-aarch64/release/mddb_compiler
 chmod a+x bin/comm.datalayer/ubuntu22-gcc-aarch64/release/dl_compliance
 chmod a+x bin/oss.flatbuffers/ubuntu22-gcc-aarch64/release/flatc
 chmod a+x bin/framework/ubuntu22-gcc-aarch64/rexroth-automation-frame
+
+chmod a+x bin/comm.datalayer/ubuntu22-gcc-aarch64/mddb_compiler
+chmod a+x bin/comm.datalayer/ubuntu22-gcc-aarch64/dl_compliance
+chmod a+x bin/oss.flatbuffers/ubuntu22-gcc-aarch64/flatc
+chmod a+x bin/framework/ubuntu22-gcc-aarch64/rexroth-automation-frame
+
 # Add x permission to all .sh files
 find . -name '*.sh' -exec chmod +x {} \;
 
@@ -121,14 +127,22 @@ echo $SEPARATION_LINE_2
 sudo apt-get install -y dpkg-dev
 
 # Install debian package locally so that 'apt-get install' will find it (for building sample project snaps)
-#dpkg-scanpackages -m . >Packages
+dpkg-scanpackages -m . >Packages
 
-sudo dpkg -i ctrlx-datalayer-2.6.1.deb
-sudo apt-get install -f
+#sudo dpkg -i ctrlx-datalayer-2.6.1.deb
+#sudo apt-get install -f
+
+# Install the Package for ctrlX datalayer
+# Get the current full path
+FULL_PATH=$(pwd)
 
 # Add package to sources list
-#FULL_PATH=$(pwd)
-#echo "deb [trusted=yes] file:${FULL_PATH} ./" | sudo tee /etc/apt/sources.list.d/ctrlx-automation.list
+echo "deb [trusted=yes] file:${FULL_PATH} ./" | sudo tee /etc/apt/sources.list.d/ctrlx-automation.list
+
+# Ensure the APT system can access the directory and files
+sudo chmod -R a+r "${FULL_PATH}"
+sudo chown -R _apt:root "${FULL_PATH}"
+sudo chmod a+X "${FULL_PATH}"
 
 
 # Use newest sources list
