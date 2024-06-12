@@ -1,5 +1,7 @@
 #!/bin/bash
 
+WORKING_DIR=$(pwd)
+
 # Function to prompt the user for input
 ask_for_installation() {
     echo "Do you want to install and setup SSH? (yes/no) [default: no]"
@@ -78,27 +80,31 @@ git clone https://github.com/boschrexroth/ctrlx-automation-sdk-ros2
 sudo apt update
 sudo apt upgrade -y
 
-# Download SDK
-cd ~/Downloads
+# Change to work directory
+cd ~
 
-wget "https://github.com/boschrexroth/ctrlx-automation-sdk/releases/download/2.6.0/ctrlx-automation-sdk-2.6.0.zip"
-unzip ctrlx-automation-sdk-2.6.0.zip -d ~
-cd ~/ctrlx-automation-sdk/scripts
+# Clone and install SDK
+sudo chmod +x {WORKING_DIR}/ctrlX_SDK/clone-install-sdk.sh
+{WORKING_DIR}/ctrlX_SDK/clone-install-sdk.sh
+
+#wget "https://github.com/boschrexroth/ctrlx-automation-sdk/releases/download/2.6.0/ctrlx-automation-sdk-2.6.0.zip"
+#unzip ctrlx-automation-sdk-2.6.0.zip -d ~
+#cd ~/ctrlx-automation-sdk/scripts
 
 # Download and execute install-required-packages.sh
 #wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-required-packages.sh
 #chmod a+x install-required-packages.sh
-./install-required-packages.sh
+#./install-required-packages.sh
 
 # Download and execute install-snapcraft.sh
 #wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-snapcraft.sh
 #chmod a+x install-snapcraft.sh
-./install-snapcraft.sh
+#./install-snapcraft.sh
 
 # Download and execute clone-install-sdk.sh
-wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/clone-install-sdk.sh
-chmod a+x clone-install-sdk.sh
-./clone-install-sdk.sh
+#wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/clone-install-sdk.sh
+#chmod a+x clone-install-sdk.sh
+#./clone-install-sdk.sh
 
 cd ~
 
