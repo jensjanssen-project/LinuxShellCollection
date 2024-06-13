@@ -120,18 +120,17 @@ echo "Installing required component dpkg-scanpackages ..."
 echo $SEPARATION_LINE_2
 sudo apt-get install -y dpkg-dev
 
-sudo chown -R _apt:root "${SDK_DIR}"/deb
-sudo chmod -R g+r "${SDK_DIR}"/deb
-sudo chmod -R g+X "${SDK_DIR}"/deb
-sudo chmod a+X "${SDK_DIR}"
-sudo chmod a+X "${SDK_DIR}"/deb
-
 # Install debian package locally so that 'apt-get install' will find it (for building sample project snaps)
 dpkg-scanpackages -m . >Packages
 
 # Add package to sources list
 FULL_PATH=$(pwd)
 echo "deb [trusted=yes] file:${FULL_PATH} ./" | sudo tee /etc/apt/sources.list.d/ctrlx-automation.list
+
+sudo chown -R _apt:root "${SDK_DIR}"/deb
+sudo chmod -R g+X "${SDK_DIR}"/deb
+sudo chmod a+X "${SDK_DIR}"
+sudo chmod a+X "${SDK_DIR}"/deb
 
 # Use newest sources list
 sudo apt-get update
