@@ -1,10 +1,5 @@
 ```
-sudo apt install unzip
-mkdir ~/Downloads
-cd ~/Downloads
-wget "https://github.com/jensjanssen-project/LinuxShellCollection/archive/refs/heads/main.zip"
-unzip main.zip -d ~
-cd ~/LinuxShellCollection-main
-chmod +x Pi4_SetupRos2HumbleCtlxSdk.sh
-./Pi4_SetupRos2HumbleCtlxSdk.sh
+wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Pi4_SetupRos2HumbleCtrlxSdk.sh"
+chmod +x Pi4_SetupRos2HumbleCtrlxSdk.sh
+./Pi4_SetupRos2HumbleCtrlxSdk.sh
 ```
