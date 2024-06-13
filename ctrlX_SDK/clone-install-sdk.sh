@@ -105,16 +105,10 @@ echo $SEPARATION_LINE_2
 # Set drwxrwxr-x for directories and -rw-rw-r-- for files
 find . \( -type d -exec chmod 775 {} \; \) -o \( -type f -exec chmod 664 {} \; \)
 # oss.flatbuffers* so that oss.flatbuffers.1.12 also fits
-chmod a+x bin/comm.datalayer/ubuntu22-gcc-aarch64/release/mddb_compiler
-chmod a+x bin/comm.datalayer/ubuntu22-gcc-aarch64/release/dl_compliance
-chmod a+x bin/oss.flatbuffers/ubuntu22-gcc-aarch64/release/flatc
-chmod a+x bin/framework/ubuntu22-gcc-aarch64/rexroth-automation-frame
-
-chmod a+x bin/comm.datalayer/ubuntu22-gcc-aarch64/mddb_compiler
-chmod a+x bin/comm.datalayer/ubuntu22-gcc-aarch64/dl_compliance
-chmod a+x bin/oss.flatbuffers/ubuntu22-gcc-aarch64/flatc
-chmod a+x bin/framework/ubuntu22-gcc-aarch64/rexroth-automation-frame
-
+chmod a+x bin/comm.datalayer/ubuntu*/release/mddb_compiler
+chmod a+x bin/comm.datalayer/ubuntu*/release/dl_compliance
+chmod a+x bin/oss.flatbuffers*/ubuntu*/release/flatc
+chmod a+x bin/framework/ubuntu*/rexroth-automation-frame
 # Add x permission to all .sh files
 find . -name '*.sh' -exec chmod +x {} \;
 
@@ -126,112 +120,21 @@ echo "Installing required component dpkg-scanpackages ..."
 echo $SEPARATION_LINE_2
 sudo apt-get install -y dpkg-dev
 
+sudo chown -R _apt:root "${SDK_DIR}"/deb
+sudo chmod -R g+r "${SDK_DIR}"/deb
+sudo chmod -R g+X "${SDK_DIR}"/deb
+sudo chmod a+X "${SDK_DIR}"
+sudo chmod a+X "${SDK_DIR}"/deb
+
 # Install debian package locally so that 'apt-get install' will find it (for building sample project snaps)
 dpkg-scanpackages -m . >Packages
 
-#sudo dpkg -i ctrlx-datalayer-2.6.1.deb
-#sudo apt-get install -f
-
-# Install the Package for ctrlX datalayer
-# Get the current full path
-FULL_PATH=$(pwd)
-
 # Add package to sources list
+FULL_PATH=$(pwd)
 echo "deb [trusted=yes] file:${FULL_PATH} ./" | sudo tee /etc/apt/sources.list.d/ctrlx-automation.list
-
-# Ensure the APT system can access the directory and files
-sudo chmod -R a+r "${FULL_PATH}"
-sudo chown -R _apt:root "${FULL_PATH}"
-sudo chmod a+X "${FULL_PATH}"
-
 
 # Use newest sources list
 sudo apt-get update
 
 # Install newest ctrlx-datalayer package
-#sudo apt-get install -y ctrlx-datalayer
-
-
-set -e
-
-echo " "
-echo "============================================"
-echo Installing snapcraft 6.x/stable
-echo "============================================"
-echo " "
-
-sudo snap install snapcraft --channel=6.x/stable --classic
-
-
-set -e
-
-echo " "
-echo "============================================"
-echo Installing required Packages
-echo "============================================"
-echo " "
-#
-# This script installs debian packages required to build apps
-# with the ctrlX AUTOMATION SDK.
-#
-# https://wiki.ubuntu.com/MultiarchSpec
-
-#sudo dpkg --add-architecture arm64
-
-DIST="$(lsb_release -sc)"
-sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ ${DIST} main restricted universe multiverse" | sudo tee /etc/apt/sources.list.d/multiarch-libs.list
-sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ ${DIST}-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/multiarch-libs.list
-sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ ${DIST}-security main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/multiarch-libs.list
-sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ ${DIST}-updates main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list.d/multiarch-libs.list
-
-# Qualify architecture
-#sudo sed -i 's/deb http:/deb [arch=amd64] http:/g' /etc/apt/sources.list
-
-# Environment variable to enable/disable the use of certain CPU capabilities.
-# 0x1: Disable all run-time detected optimizations
-# see https://gnutls.org/manual/html_node/Debugging-and-auditing.html
-# Fixes issue: "Method https has died unexpectedly! Sub-process https received signal 4"
-# see https://askubuntu.com/questions/1420966/method-https-has-died-unexpectedly-sub-process-https-received-signal-4-after
-export GNUTLS_CPUID_OVERRIDE=0x1
-
-# Prevent prompt that ask to restart services
-export DEBIAN_FRONTEND=noninteractive
-
-sudo -E apt update
-sudo -E apt upgrade
-
-# install base packages ...
-sudo -E apt install -y \
-  zip \
-  unzip \
-  p7zip-full \
-  git \
-  apt-transport-https \
-  whois \
-  net-tools \
-  pkg-config \
-  jq \
-  sshpass \
-  dpkg-dev
-
-# install python tools ...
-sudo -E apt install -y \
-  python3-pip \
-  virtualenv
-
-# install amd64 build tools ...
-sudo -E apt install -y \
-  build-essential \
-  gdb \
-  cmake
-
-# install required amd64 packages ...
-sudo -E apt install -y \
-  libxml2-dev \
-  uuid-dev \
-  libbz2-1.0 \
-  libzmq3-dev \
-  libsystemd-dev \
-  libssl-dev
-
-
+sudo apt-get install -y ctrlx-datalayer

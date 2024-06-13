@@ -32,14 +32,6 @@ else
 fi
 
 
-# Function to modify /etc/apt/sources.list to replace amd64 with arm64
-modify_sources_list() {
-    sudo sed -i 's/amd64/arm64/g' /etc/apt/sources.list
-}
-
-# Modify architecture in sources.list
-#modify_sources_list
-
 
 # Update and upgrade the system
 sudo apt update
@@ -83,25 +75,31 @@ sudo apt upgrade -y
 # Change to work directory
 cd ~
 
-# Clone and install SDK
-sudo chmod +x ${WORKING_DIR}/ctrlX_SDK/clone-install-sdk.sh
-${WORKING_DIR}/ctrlX_SDK/clone-install-sdk.sh
-
-#wget "https://github.com/boschrexroth/ctrlx-automation-sdk/releases/download/2.6.0/ctrlx-automation-sdk-2.6.0.zip"
-#unzip ctrlx-automation-sdk-2.6.0.zip -d ~
-#cd ~/ctrlx-automation-sdk/scripts
-
 # Download and execute install-required-packages.sh
-#wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-required-packages.sh
-#chmod a+x install-required-packages.sh
-#./install-required-packages.sh
+wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-required-packages.sh
+chmod a+x install-required-packages.sh
+./install-required-packages.sh
 
 # Download and execute install-snapcraft.sh
-#wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-snapcraft.sh
-#chmod a+x install-snapcraft.sh
-#./install-snapcraft.sh
+wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/install-snapcraft.sh
+chmod a+x install-snapcraft.sh
+./install-snapcraft.sh
 
-# Download and execute clone-install-sdk.sh
+# Function to modify /etc/apt/sources.list to replace amd64 with arm64
+modify_sources_list() {
+    sudo sed -i 's/amd64/arm64/g' /etc/apt/sources.list
+}
+
+# Modify architecture in sources.list
+modify_sources_list
+
+
+# Clone and install SDK (Modified)
+wget https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/ctrlX_SDK/clone-install-sdk.sh
+chmod a+x clone-install-sdk.sh
+./clone-install-sdk.sh
+
+# Download and execute clone-install-sdk.sh (original)
 #wget https://raw.githubusercontent.com/boschrexroth/ctrlx-automation-sdk/main/scripts/clone-install-sdk.sh
 #chmod a+x clone-install-sdk.sh
 #./clone-install-sdk.sh
