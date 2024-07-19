@@ -12,3 +12,10 @@ wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection
 chmod +x Ubuntu22_InstallDocker.sh
 ./Ubuntu22_InstallDocker.sh
 ```
+
+## Ubuntu 22.04 Install VNC Server
+```
+wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu2204_SetupVNCServer.sh"
+chmod +x Ubuntu2204_SetupVNCServer.sh
+./Ubuntu2204_SetupVNCServer.sh
+```
