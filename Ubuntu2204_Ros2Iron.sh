@@ -76,12 +76,12 @@ sudo apt-get update && apt-get install --no-install-recommends -y \
     python3-rosdep \
     python3-vcstool \
     python3-pip \
+	python3-flask \
+	python3-werkzeug \
     && rm -rf /var/lib/apt/lists/*
 
 sudo rosdep init && rosdep update --rosdistro jazzy
 
-# Install Python dependencies
-sudo apt install -y install python3-flask python3-werkzeug
 
 # Source the ROS2 environment setup script in .bashrc
 echo "source /opt/ros/iron/setup.bash" >> ~/.bashrc

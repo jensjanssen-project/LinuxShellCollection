@@ -19,3 +19,10 @@ wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection
 chmod +x Ubuntu2204_SetupVNCServer.sh
 ./Ubuntu2204_SetupVNCServer.sh
 ```
+
+## Ubuntu 22.04 Enable Port Forwarding
+```
+wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu2204_EnablePortForwarding.sh"
+chmod +x Ubuntu2204_EnablePortForwarding.sh
+sudo ./UUbuntu2204_EnablePortForwarding.sh
+```
