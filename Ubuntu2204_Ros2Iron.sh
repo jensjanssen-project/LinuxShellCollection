@@ -82,13 +82,13 @@ sudo apt-get update && apt-get install --no-install-recommends -y \
 
 sudo rosdep init && rosdep update --rosdistro jazzy
 
+# install some more tools
+sudo apt install ros-noetic-laser-proc
+sudo apt install ros-iron-rosbridge-server
+sudo apt install ros-iron-navigation2
+sudo apt install ros-iron-nav2-bringup
 
-# Source the ROS2 environment setup script in .bashrc
-echo "source /opt/ros/iron/setup.bash" >> ~/.bashrc
-
-# Source the .bashrc file to apply changes
-source ~/.bashrc
-
+pip install flask flask-socketio eventlet
 
 
 # Update and upgrade the system
@@ -100,5 +100,11 @@ cd ~
 
 mkdir ros2_ws
 
+# Source the ROS2 environment setup script in .bashrc
+echo "source /opt/ros/iron/setup.bash" >> ~/.bashrc
+echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
+
+# Source the .bashrc file to apply changes
+source ~/.bashrc
 
 echo "Setup completed successfully!"

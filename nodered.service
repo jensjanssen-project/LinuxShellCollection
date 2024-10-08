@@ -1,0 +1,13 @@
+[Unit]
+Description=Node-RED in Docker Container
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/docker run --name nodered -v /home/pid/node_red_data:/data -p 1880:1880 nodered/node-red
+ExecStop=/usr/bin/docker stop nodered
+ExecStopPost=/usr/bin/docker rm nodered
+
+[Install]
+WantedBy=multi-user.target
