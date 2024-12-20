@@ -83,10 +83,12 @@ sudo apt-get update && apt-get install --no-install-recommends -y \
 sudo rosdep init && rosdep update --rosdistro jazzy
 
 # install some more tools
-sudo apt install ros-noetic-laser-proc
-sudo apt install ros-iron-rosbridge-server
-sudo apt install ros-iron-navigation2
-sudo apt install ros-iron-nav2-bringup
+sudo apt install -y ros-iron-laser-proc
+sudo apt install -y ros-iron-rosbridge-server
+sudo apt install -y ros-iron-navigation2
+sudo apt install -y ros-iron-nav2-bringup
+sudo apt install -y pip
+sudo apt install -y ros-iron-ros-gz-sim ros-iron-ros-gz-plugins
 
 pip install flask flask-socketio eventlet
 
@@ -106,5 +108,17 @@ echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
 
 # Source the .bashrc file to apply changes
 source ~/.bashrc
+
+
+# install gazebo
+sudo apt-get update
+sudo apt-get install lsb-release gnupg
+
+sudo curl https://packages.osrfoundation.org/gazebo.gpg --output /usr/share/keyrings/pkgs-osrf-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/pkgs-osrf-archive-keyring.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/gazebo-stable.list > /dev/null
+sudo apt-get update
+sudo apt-get install gz-ionic -y
+
+
 
 echo "Setup completed successfully!"
