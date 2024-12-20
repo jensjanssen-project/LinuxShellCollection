@@ -40,3 +40,8 @@ wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection
 chmod +x Ubuntu_SetupSSH.sh
 sudo ./Ubuntu_SetupSSH.sh
 ```
+
+## Ubuntu 24.04 Completely
+wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu2404_Completely.sh"
+chmod +x Ubuntu2404_Completely.sh
+sudo ./Ubuntu2404_Completely.sh
