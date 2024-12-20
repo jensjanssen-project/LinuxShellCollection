@@ -42,6 +42,30 @@ install_packages() {
     apt install -y lightdm x11vnc xserver-xorg-video-dummy ufw
 }
 
+# Function: Disable Wayland in GDM3
+disable_wayland() {
+    echo "✋ Disabling Wayland in GDM3..."
+
+    if [ -f /etc/gdm3/custom.conf ]; then
+        # Check if WaylandEnable is already set to false
+        if grep -q "^WaylandEnable=false" /etc/gdm3/custom.conf; then
+            echo "✅ Wayland is already disabled in GDM3."
+        else
+            # Uncomment the WaylandEnable=false line if it's commented
+            sed -i 's/^#\s*WaylandEnable=false/WaylandEnable=false/' /etc/gdm3/custom.conf
+
+            # If WaylandEnable=false was not found, append it
+            if ! grep -q "^WaylandEnable=false" /etc/gdm3/custom.conf; then
+                echo "WaylandEnable=false" >> /etc/gdm3/custom.conf
+            fi
+
+            echo "✅ Wayland has been disabled in GDM3."
+        fi
+    else
+        echo "⚠️ /etc/gdm3/custom.conf does not exist. Skipping Wayland disable."
+    fi
+}
+
 # Function: Configure lightdm as the default display manager
 configure_display_manager() {
     echo "⚙️ Configuring $DISPLAY_MANAGER as the default display manager..."
@@ -68,6 +92,11 @@ setup_virtual_display() {
         cp "$DUMMY_CONF_FILE" "${DUMMY_CONF_FILE}.bak"
     fi
 
+    # Generate Modeline using cvt
+    WIDTH=$(echo $RESOLUTION | cut -d'x' -f1)
+    HEIGHT=$(echo $RESOLUTION | cut -d'x' -f2)
+    MODELINE=$(cvt $WIDTH $HEIGHT | grep "Modeline" | cut -d' ' -f2-)
+
     # Create the dummy Xorg configuration file
     cat > "$DUMMY_CONF_FILE" <<EOL
 Section "Device"
@@ -80,7 +109,7 @@ Section "Monitor"
     Identifier "DummyMonitor"
     HorizSync 28.0-80.0
     VertRefresh 48.0-75.0
-    Modeline "$(cvt $(echo $RESOLUTION | cut -dx -f1) $(echo $RESOLUTION | cut -dx -f2) | grep -oP '(?<=Modeline ")[^"]+')"
+    Modeline "$MODELINE"
     Option "PreferredMode" "$RESOLUTION"
 EndSection
 
@@ -133,7 +162,6 @@ setup_vnc_password() {
         mkdir -p "$(dirname "$VNC_PASSWORD_FILE")"
 
         # Use x11vnc to store the password
-        # Utilize 'expect' to automate the password input
         /usr/bin/x11vnc -storepasswd "$VNC_PASS" "$VNC_PASSWORD_FILE"
 
         echo "✅ VNC password has been set and stored securely."
@@ -229,6 +257,7 @@ main() {
     check_root
     system_update
     install_packages
+    disable_wayland
     configure_display_manager
     setup_virtual_display
     setup_vnc_password
