@@ -31,7 +31,7 @@ else
 	echo "⚠️ /etc/gdm3/custom.conf does not exist. Skipping Wayland disable."
 fi
 	
-systemctl restart gdm3
+#systemctl restart gdm3
 	
 apt update
 apt install -y lightdm
@@ -59,8 +59,6 @@ EOF
 systemctl daemon-reload
 systemctl enable x11vnc.service
 systemctl start x11vnc.service
-systemctl status x11vnc.service
-
 
 ufw allow 5900/tcp
 ufw reload
