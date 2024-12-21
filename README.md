@@ -61,3 +61,10 @@ wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection
 chmod +x Ubuntu2404_VirtualDisplay.sh
 sudo ./Ubuntu2404_VirtualDisplay.sh
 ```
+
+## Ubuntu 24.04 X11 Enable
+```
+wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu2404_X11Enable.sh"
+chmod +x Ubuntu2404_X11Enable.sh
+sudo ./Ubuntu2404_X11Enable.sh
+```
