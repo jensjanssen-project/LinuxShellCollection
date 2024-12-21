@@ -16,6 +16,7 @@ apt install -y lightdm
 apt install -y x11vnc
 
 x11vnc -usepw
+#ExecStart=/usr/bin/x11vnc -forever -display :0 -auth guess -passwdfile /home/$SUDO_USER/.vnc/passwd
 
 echo "Configuring x11vnc systemd service..."
 cat <<EOF > /lib/systemd/system/x11vnc.service
@@ -25,7 +26,7 @@ After=display-manager.service network.target syslog.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/x11vnc -forever -display :0 -auth guess -passwdfile /home/$SUDO_USER/.vnc/passwd
+ExecStart=/usr/bin/x11vnc -forever -display :0 -auth guess -passwd my-password
 ExecStop=/usr/bin/killall x11vnc
 Restart=on-failure
 
