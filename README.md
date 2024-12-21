@@ -54,3 +54,10 @@ wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection
 chmod +x Ubuntu2404_VNC.sh
 sudo ./Ubuntu2404_VNC.sh
 ```
+
+## Ubuntu 24.04 Install Virtual Display
+```
+wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu2404_VirtualDisplay.sh"
+chmod +x Ubuntu2404_VirtualDisplay.sh
+sudo ./Ubuntu2404_VirtualDisplay.sh
+```
