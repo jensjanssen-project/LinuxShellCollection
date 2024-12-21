@@ -15,7 +15,7 @@ apt install -y lightdm
 # reboot
 apt install -y x11vnc
 
-x11vnc -usepw
+#x11vnc -usepw
 #ExecStart=/usr/bin/x11vnc -forever -display :0 -auth guess -passwdfile /home/$SUDO_USER/.vnc/passwd
 
 echo "Configuring x11vnc systemd service..."
