@@ -12,7 +12,24 @@ set -e
 	
 apt update
 apt install -y lightdm
-# reboot
+
+# 4. Disable GDM3 and Enable LightDM
+echo "Disabling GDM3 and enabling LightDM..."
+systemctl disable gdm3
+systemctl enable lightdm
+
+# 5. Restart the Display Manager to Apply Changes
+# This switches the display manager without rebooting
+echo "Restarting LightDM to apply changes..."
+# Stop GDM3 if it's running
+systemctl stop gdm3 || true
+# Start LightDM
+systemctl start lightdm
+
+# Give some time for LightDM to start properly
+sleep 5
+
+
 apt install -y x11vnc
 
 #x11vnc -usepw
