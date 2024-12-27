@@ -62,12 +62,6 @@ chmod +x Ubuntu2404_VirtualDisplay.sh
 sudo ./Ubuntu2404_VirtualDisplay.sh
 ```
 
-## Ubuntu 24.04 Install Dummy Display
-```
-wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu2404_DummyDisplay.sh"
-chmod +x Ubuntu2404_DummyDisplay.sh
-sudo ./Ubuntu2404_DummyDisplay.sh
-```
 
 ## Ubuntu 24.04 X11 Enable
 ```
