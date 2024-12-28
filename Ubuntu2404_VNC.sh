@@ -35,18 +35,32 @@ sleep 5
 
 apt install -y x11vnc
 
-#x11vnc -usepw
-#ExecStart=/usr/bin/x11vnc -forever -display :0 -auth guess -passwdfile /home/$SUDO_USER/.vnc/passwd
 
 echo "Configuring x11vnc systemd service..."
-cat <<EOF > /lib/systemd/system/x11vnc.service
+
+# Prompt the user to enter a password securely
+read -sp "Enter x11vnc password: " X11VNC_PASSWORD
+echo
+read -sp "Confirm x11vnc password: " X11VNC_PASSWORD_CONFIRM
+echo
+
+# Check if passwords match
+if [ "$X11VNC_PASSWORD" != "$X11VNC_PASSWORD_CONFIRM" ]; then
+    echo "Error: Passwords do not match. Exiting."
+    exit 1
+fi
+
+# Optionally, you can add more password validation here (e.g., length, complexity)
+
+# Create the systemd service file with the provided password
+sudo tee /lib/systemd/system/x11vnc.service > /dev/null <<EOF
 [Unit]
 Description=x11vnc service
 After=display-manager.service network.target syslog.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/x11vnc -forever -display :0 -auth guess -passwd my-password
+ExecStart=/usr/bin/x11vnc -forever -display :0 -auth guess -passwd ${X11VNC_PASSWORD}
 ExecStop=/usr/bin/killall x11vnc
 Restart=on-failure
 
