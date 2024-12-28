@@ -27,25 +27,11 @@ chmod +x Ubuntu2204_EnablePortForwarding.sh
 sudo ./Ubuntu2204_EnablePortForwarding.sh
 ```
 
-## Ubuntu 24.04 Install VNC Server and Virtual Display
-```
-wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubunut2404_SetupVNC_VirtDisplay.sh"
-chmod +x Ubunut2404_SetupVNC_VirtDisplay.sh
-sudo ./Ubunut2404_SetupVNC_VirtDisplay.sh
-```
-
 ## Ubuntu Setup SSH
 ```
 wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu_SetupSSH.sh"
 chmod +x Ubuntu_SetupSSH.sh
 sudo ./Ubuntu_SetupSSH.sh
-```
-
-## Ubuntu 24.04 Completely
-```
-wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu2404_Completely.sh"
-chmod +x Ubuntu2404_Completely.sh
-sudo ./Ubuntu2404_Completely.sh
 ```
 
 ## Ubuntu 24.04 Install VNC Server
@@ -68,4 +54,11 @@ sudo ./Ubuntu2404_VirtualDisplay.sh
 wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu2404_X11Enable.sh"
 chmod +x Ubuntu2404_X11Enable.sh
 sudo ./Ubuntu2404_X11Enable.sh
+```
+
+## Ubuntu 24.04 complete RaspberryPi5 Setup
+```
+wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu2404_RaspberryPi5.sh"
+chmod +x Ubuntu2404_RaspberryPi5.sh
+sudo ./Ubuntu2404_RaspberryPi5.sh
 ```

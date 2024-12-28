@@ -11,6 +11,9 @@
 set -e
 	
 apt update
+
+echo "In next step select lightdm as default display Manager"
+read -n 1 -s -r -p "Press any key to continue..."
 apt install -y lightdm
 
 # 4. Disable GDM3 and Enable LightDM

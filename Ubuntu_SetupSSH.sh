@@ -11,3 +11,4 @@ sudo ufw allow ssh
 sudo ufw enable
 sudo ufw status
 echo "SSH setup complete."
+sudo reboot
