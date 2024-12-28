@@ -21,6 +21,8 @@ if ask_for_installation; then
 	chmod +x Ubuntu_SetupSSH.sh
 	sudo ./Ubuntu_SetupSSH.sh
 	
+	echo "In next step we make a reboot, execute the file agian only over SSH!"
+	read -n 1 -s -r -p "Press any key to continue..."
 	sudo reboot
 else
     echo "SSH setup aborted."
