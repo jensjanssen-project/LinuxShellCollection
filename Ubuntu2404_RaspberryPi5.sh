@@ -21,7 +21,7 @@ if ask_for_installation; then
 	chmod +x Ubuntu_SetupSSH.sh
 	sudo ./Ubuntu_SetupSSH.sh
 	
-	echo "In next step we make a reboot, execute the file agian only over SSH!"
+	echo "In next step we make a reboot, execute the file again only over SSH!"
 	read -n 1 -s -r -p "Press any key to continue..."
 	sudo reboot
 else
@@ -47,3 +47,7 @@ chmod +x Ubuntu22_InstallDocker.sh
 
 
 echo "Setup completed successfully!"
+
+echo "In next step we make a reboot, remove the display cable from the Pi"
+read -n 1 -s -r -p "Press any key to continue..."
+sudo reboot
