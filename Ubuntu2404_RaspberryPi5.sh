@@ -20,6 +20,8 @@ if ask_for_installation; then
 	wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu_SetupSSH.sh"
 	chmod +x Ubuntu_SetupSSH.sh
 	sudo ./Ubuntu_SetupSSH.sh
+	
+	sudo reboot
 else
     echo "SSH setup aborted."
 fi
