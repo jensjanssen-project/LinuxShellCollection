@@ -51,11 +51,23 @@ sudo apt install -y terminator
 # Install Curl
 sudo apt install -y curl
 
-# Install Snap and Arduino CLI
+# Install Arduino CLI
 curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
 echo 'export PATH=$PATH:~/bin' >> ~/.bashrc
 source ~/.bashrc
 
+# Grant Serial Port Permissions
+sudo usermod -a -G dialout $(whoami)
+
+# Setup arduino-cli
+arduino-cli config init
+arduino-cli core update-index
+arduino-cli core install arduino:avr
+arduino-cli core install arduino:megaavr
+arduino-cli lib install "Adafruit NeoPixel"
+
+# install MidnigthCommander
+sudo apt install -y mc
 
 echo "Setup completed successfully!"
 
