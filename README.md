@@ -62,10 +62,3 @@ wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection
 chmod +x Ubuntu2404_RaspberryPi5.sh
 sudo ./Ubuntu2404_RaspberryPi5.sh
 ```
-
-## Ubuntu 24.04 complete RaspberryPi5_2 Setup
-```
-wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu2404_RaspberryPi5_2.sh"
-chmod +x Ubuntu2404_RaspberryPi5_2.sh
-sudo ./Ubuntu2404_RaspberryPi5_2.sh
-```

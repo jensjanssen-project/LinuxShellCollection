@@ -45,6 +45,17 @@ wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection
 chmod +x Ubuntu22_InstallDocker.sh
 ./Ubuntu22_InstallDocker.sh
 
+# Install terminal program terminator
+sudo apt install -y terminator
+
+# Install Curl
+sudo apt install -y curl
+
+# Install Snap and Arduino CLI
+curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+echo 'export PATH=$PATH:~/bin' >> ~/.bashrc
+source ~/.bashrc
+
 
 echo "Setup completed successfully!"
 
