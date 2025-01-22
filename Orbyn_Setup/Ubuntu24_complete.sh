@@ -17,9 +17,12 @@ ask_for_installation() {
 # Main script logic
 if ask_for_installation; then
     # Setup & enable SSH
-	wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Ubuntu_SetupSSH.sh"
-	chmod +x Ubuntu_SetupSSH.sh
-	sudo ./Ubuntu_SetupSSH.sh
+	echo "Setting up SSH..."
+	sudo apt update
+	sudo apt install -y openssh-server
+	sudo systemctl enable ssh
+	sudo systemctl start ssh
+	echo "SSH setup complete."
 	
 	echo "In next step we make a reboot, execute the file again only over SSH!"
 	read -n 1 -s -r -p "Press any key to continue..."
@@ -52,11 +55,13 @@ network:
 EOL
 
 # Set correct ownership and permissions
-chown root:root /etc/netplan/00-installer-config.yaml
-chmod 600 /etc/netplan/00-installer-config.yaml
+sudo chown root:root /etc/netplan/00-installer-config.yaml
+sudo chmod 600 /etc/netplan/00-installer-config.yaml
 
 # Apply the configuration
 netplan apply
+
+sleep 5
 
 echo "Static IP configuration complete!"
 }
@@ -106,16 +111,21 @@ install_docker(){
 
 	sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-	# Add the current user to the docker group
-	sudo usermod -aG docker $USER
+    # Add the current user to the docker group
+    sudo usermod -aG docker $USER
 
-	# Restart the Docker daemon
-	sudo systemctl restart docker
+    # Restart the Docker daemon
+    sudo systemctl restart docker
 
-	# Note: The following command will only affect the current script session
-	# The user will still need to log out and back in for the changes
-	# to take effect in their terminal
-	newgrp docker
+    # Apply group changes without logout/login
+    echo "Applying group changes..."
+    newgrp docker <<EONG
+    echo "Testing Docker installation..."
+    docker run hello-world
+EONG
+
+    echo "Docker installation complete!"
+    echo "NOTE: For permanent effect, please log out and log back in, or restart your system."
 }
 
 install_xrdp(){
@@ -254,19 +264,19 @@ generate_ssh(){
 	echo "Setting up SSH key..."
 
 	# Create .ssh directory if it doesn't exist and set proper permissions
-	mkdir -p ~/.ssh
-	chmod 700 ~/.ssh
+	mkdir -p /home/pid/.ssh
+	chmod 700 /home/pid/.ssh
 
 	# Generate ed25519 key without prompts and without passphrase
-	ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -N "" -q
+	ssh-keygen -t ed25519 -f /home/pid/.ssh/id_ed25519 -N "" -q
 
 	# Add to authorized_keys and set proper permissions
-	cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
-	chmod 600 ~/.ssh/authorized_keys
+	cat /home/pid/.ssh/id_ed25519.pub >> /home/pid/.ssh/authorized_keys
+	chmod 600 /home/pid/.ssh/authorized_keys
 
 	echo "SSH key setup complete!"
 	echo "Your key is:"
-	cat ~/.ssh/id_ed25519
+	cat /home/pid/.ssh/id_ed25519
 }
 
 
