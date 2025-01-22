@@ -1,0 +1,120 @@
+#cloud-config
+autoinstall:
+  version: 1
+  
+  # Localization settings
+  locale: en_US.UTF-8
+  timezone: Europe/Berlin
+  keyboard:
+    layout: de
+    variant: nodeadkeys
+  
+  # Network configuration
+  network:
+    version: 2
+    ethernets:
+      eno1:
+        dhcp4: false
+        addresses:
+          - 192.168.137.100/24
+        routes:
+          - to: default
+            via: 192.168.137.1
+  
+  # Storage configuration
+  storage:
+    layout:
+      name: lvm
+  
+  # User configuration
+  identity:
+    hostname: ubuntu
+    username: pid
+    password: "$6$rounds=4096$NSmxkFQzWzxoF$9DOkKJ9JSYbkWuvqCVHdTcQxl4tXksY0MYDsWxvJ6IiFJKL1D8jsuehIRVVFZZmXZt3SqK波9RzjDDFyyvGL1"
+  
+  # SSH configuration
+  ssh:
+    install-server: true
+    allow-pw: true
+  
+  # Package installation and updates
+  packages:
+    - iptables
+    - iptables-persistent
+    - netfilter-persistent
+    - language-pack-en
+    - language-pack-de
+    - language-pack-de-base
+    - ca-certificates
+    - curl
+    - gnupg
+    - ufw
+    - xfce4
+    - xfce4-goodies
+    - xrdp
+  
+  # System updates configuration
+  updates: security
+  
+  # Post-installation commands
+  late-commands:
+    # Set system locale while keeping English UI
+    - curtin in-target -- locale-gen en_US.UTF-8
+    - curtin in-target -- locale-gen de_DE.UTF-8
+    - curtin in-target -- update-locale LANG=en_US.UTF-8 LC_TIME=de_DE.UTF-8 LC_PAPER=de_DE.UTF-8 LC_MEASUREMENT=de_DE.UTF-8
+    
+    # Docker Installation
+    - curtin in-target -- install -m 0755 -d /etc/apt/keyrings
+    - curtin in-target -- curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    - curtin in-target -- chmod a+r /etc/apt/keyrings/docker.asc
+    - |
+      curtin in-target -- bash -c 'echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+      tee /etc/apt/sources.list.d/docker.list > /dev/null'
+    - curtin in-target -- apt-get update
+    - curtin in-target -- apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    
+    # Add current user to docker group
+    - curtin in-target -- usermod -aG docker pid
+    
+    # Start and enable Docker service
+    - curtin in-target -- systemctl enable docker
+    - curtin in-target -- systemctl start docker
+    
+    # XRDP Setup
+    - curtin in-target -- su - pid -c "echo xfce4-session > /home/pid/.xsession"
+    - curtin in-target -- sed -i '/^test -x.*$/s/^/#/' /etc/xrdp/startwm.sh
+    - curtin in-target -- sed -i '/^# Test for X session/i . /home/pid/.xsession' /etc/xrdp/startwm.sh
+    - curtin in-target -- systemctl enable xrdp
+    - curtin in-target -- usermod -a -G ssl-cert xrdp
+    - curtin in-target -- systemctl start xrdp
+    
+    # NAT and IP Forwarding Setup
+    - curtin in-target -- sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+    - curtin in-target -- sysctl -p
+    - curtin in-target -- iptables -t nat -A POSTROUTING -o eno1 -j MASQUERADE
+    - curtin in-target -- netfilter-persistent save
+    - curtin in-target -- netfilter-persistent reload
+    
+    # UFW configuration
+    - curtin in-target -- ufw allow 80/tcp
+    - curtin in-target -- ufw allow 443/tcp
+    - curtin in-target -- ufw allow 1000:60000/tcp
+    - curtin in-target -- ufw allow 1000:60000/udp
+    - curtin in-target -- ufw allow 3389/tcp  # XRDP port
+    
+    # IPTables configuration
+    - curtin in-target -- iptables -A INPUT -p tcp --dport 5000 -j ACCEPT
+    - curtin in-target -- iptables -A INPUT -p tcp --dport 5005 -j ACCEPT
+    - curtin in-target -- iptables-save
+    
+    # Configure UFW forwarding policy
+    - curtin in-target -- sed -i 's/^DEFAULT_FORWARD_POLICY=.*/DEFAULT_FORWARD_POLICY="ACCEPT"/' /etc/default/ufw
+    
+    # Enable and reload UFW
+    - curtin in-target -- ufw --force enable
+    - curtin in-target -- ufw reload
+
+  # Reboot after installation
+  shutdown: reboot
