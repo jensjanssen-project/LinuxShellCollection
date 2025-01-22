@@ -62,3 +62,10 @@ wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection
 chmod +x Ubuntu2404_RaspberryPi5.sh
 sudo ./Ubuntu2404_RaspberryPi5.sh
 ```
+
+## Ubuntu 24.04 complete Orbyn Setup
+```
+wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Orbyn_Setup/Ubuntu24_complete.sh"
+chmod +x Ubuntu24_complete.sh
+sudo ./Ubuntu24_complete.sh
+```
