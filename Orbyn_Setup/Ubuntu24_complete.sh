@@ -112,17 +112,13 @@ install_docker(){
 	sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
     # Add the current user to the docker group
+	sudo groupadd docker
     sudo usermod -aG docker $USER
-
+	newgrp docker
+	docker run hello-world
+	
     # Restart the Docker daemon
-    sudo systemctl restart docker
-
-    # Apply group changes without logout/login
-    echo "Applying group changes..."
-    newgrp docker <<EONG
-    echo "Testing Docker installation..."
-    docker run hello-world
-EONG
+    #sudo systemctl restart docker
 
     echo "Docker installation complete!"
     echo "NOTE: For permanent effect, please log out and log back in, or restart your system."
@@ -185,35 +181,15 @@ setup_nat() {
     ip -br link show
 
     # Get all available interfaces
-    AVAILABLE_ETH=$(ip -br link show | grep -E "en|eth" | awk '{print $1}')
-    AVAILABLE_WLAN=$(ip -br link show | grep -E "wl" | awk '{print $1}')
+    ETH_INTERFACE=$(ip -br link show | grep -E "en|eth" | awk '{print $1}')
+    WLAN_INTERFACE=$(ip -br link show | grep -E "wl" | awk '{print $1}')
 
-    # Show available interfaces
-    echo -e "\nAvailable Ethernet interfaces:"
-    echo "$AVAILABLE_ETH"
-    echo -e "\nAvailable Wireless interfaces:"
-    echo "$AVAILABLE_WLAN"
-
-    # Let user select or confirm interfaces
-    echo -e "\nPlease enter the Ethernet interface name to use:"
-    read -p "[$AVAILABLE_ETH]: " ETH_INTERFACE
-    ETH_INTERFACE=${ETH_INTERFACE:-$AVAILABLE_ETH}
-
-    echo -e "\nPlease enter the Wireless interface name to use:"
-    read -p "[$AVAILABLE_WLAN]: " WLAN_INTERFACE
-    WLAN_INTERFACE=${WLAN_INTERFACE:-$AVAILABLE_WLAN}
 
     # Confirm selections
     echo -e "\nUsing the following interfaces:"
     echo "Ethernet (External): $ETH_INTERFACE"
     echo "Wireless (Internal): $WLAN_INTERFACE"
-    read -p "Continue? [Y/n] " confirm
-    confirm=${confirm:-Y}
-    
-    if [[ ! $confirm =~ ^[Yy]$ ]]; then
-        echo "Aborted by user"
-        return 1
-    fi
+
 
     echo "Clearing existing NAT rules..."
     sudo iptables -t nat -F POSTROUTING

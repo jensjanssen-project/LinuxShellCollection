@@ -67,5 +67,5 @@ sudo ./Ubuntu2404_RaspberryPi5.sh
 ```
 wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Orbyn_Setup/Ubuntu24_complete.sh"
 chmod +x Ubuntu24_complete.sh
-sudo ./Ubuntu24_complete.sh 2>&1 | tee Ubuntu24_complete.log
+sudo ./Ubuntu24_complete.sh
 ```
