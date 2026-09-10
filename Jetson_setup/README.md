@@ -12,8 +12,8 @@ vollständig ein. Dazu gehören:
 - abschließende Prüfungen aller Dienste, Adressen, Routen und Container
 
 Getestetes Zielsystem ist ein NVIDIA Jetson mit Ubuntu 22.04 und mindestens
-30 GB freiem Speicher. `eth5` und `eth6` werden zusätzlich anhand der bekannten
-MAC-Adressen dieses Rechners geprüft, bevor ihre Konfiguration geändert wird.
+30 GB freiem Speicher. Das Skript prüft, ob `eth5` und `eth6` vorhanden sind.
+Ein zusätzlicher MAC-Abgleich kann bei Bedarf ausdrücklich aktiviert werden.
 
 ## Start
 
@@ -28,7 +28,7 @@ chmod +x install-jetson.sh
 ```
 
 Für einen fest reproduzierbaren Produktiveinsatz sollte `main` in beiden URLs
-durch einen vorhandenen Release-Tag wie `v1.0.0` ersetzt werden. Dadurch wird
+durch einen vorhandenen Release-Tag wie `v1.0.1` ersetzt werden. Dadurch wird
 nicht unbemerkt eine später veränderte Version ausgeführt.
 
 Das GitLab-Repository `pidvision-studio` ist nicht anonym erreichbar. Vor der
@@ -68,8 +68,8 @@ als Klartextargument in der Prozessliste erscheint.
 
 ## Abweichende Hardware
 
-Die voreingestellten MAC-Adressen stammen von dem dokumentierten Rechner. Bei
-einem anderen Gerät müssen sie ausdrücklich angegeben werden:
+Wenn die Portzuordnung zusätzlich abgesichert werden soll, können die erwarteten
+MAC-Adressen ausdrücklich angegeben werden:
 
 ```bash
 ETH5_EXPECTED_MAC=aa:bb:cc:dd:ee:ff \
@@ -77,9 +77,9 @@ ETH6_EXPECTED_MAC=11:22:33:44:55:66 \
 ./install-jetson.sh
 ```
 
-Ein leerer Wert deaktiviert den MAC-Abgleich. Andere Ubuntu-Versionen oder
-Nicht-Jetson-Systeme benötigen zusätzlich `ALLOW_UNTESTED_SYSTEM=1` und gelten
-als ungetestet.
+Ohne diese Variablen findet kein MAC-Abgleich statt. Andere Ubuntu-Versionen
+oder Nicht-Jetson-Systeme benötigen zusätzlich `ALLOW_UNTESTED_SYSTEM=1` und
+gelten als ungetestet.
 
 ## Firewall und Wiederholungsläufe
 

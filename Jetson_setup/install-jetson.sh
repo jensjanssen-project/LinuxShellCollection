@@ -8,6 +8,8 @@
 # Optionale Konfiguration per Umgebungsvariable:
 #   ETH5_ADDRESS=192.168.1.11/24
 #   ETH6_ADDRESS=192.168.11.110/24
+#   ETH5_EXPECTED_MAC=aa:bb:cc:dd:ee:ff    # optionaler Port-Abgleich
+#   ETH6_EXPECTED_MAC=11:22:33:44:55:66    # optionaler Port-Abgleich
 #   APP_REPOSITORY=https://gitlab.com/pidvision/pidvision-studio.git
 #   APP_DIRECTORY="$HOME/repos/pidvision-studio"
 #   TAILSCALE_AUTH_KEY=tskey-auth-...       # fuer unbeaufsichtigte Anmeldung
@@ -25,13 +27,13 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 readonly SCRIPT_NAME="${0##*/}"
-readonly INSTALLER_VERSION='1.0.0'
+readonly INSTALLER_VERSION='1.0.1'
 readonly ETH5_INTERFACE="${ETH5_INTERFACE:-eth5}"
 readonly ETH6_INTERFACE="${ETH6_INTERFACE:-eth6}"
 readonly ETH5_ADDRESS="${ETH5_ADDRESS:-192.168.1.11/24}"
 readonly ETH6_ADDRESS="${ETH6_ADDRESS:-192.168.11.110/24}"
-readonly ETH5_EXPECTED_MAC="${ETH5_EXPECTED_MAC-74:fe:48:c8:d1:9d}"
-readonly ETH6_EXPECTED_MAC="${ETH6_EXPECTED_MAC-74:fe:48:c8:d1:9e}"
+readonly ETH5_EXPECTED_MAC="${ETH5_EXPECTED_MAC:-}"
+readonly ETH6_EXPECTED_MAC="${ETH6_EXPECTED_MAC:-}"
 readonly APP_REPOSITORY="${APP_REPOSITORY:-https://gitlab.com/pidvision/pidvision-studio.git}"
 readonly APP_DIRECTORY="${APP_DIRECTORY:-$HOME/repos/pidvision-studio}"
 readonly NONINTERACTIVE="${NONINTERACTIVE:-0}"
@@ -200,7 +202,10 @@ verify_interface_identity() {
   local actual_mac
   ip link show "$interface" >/dev/null 2>&1 \
     || die "Netzwerkschnittstelle $interface wurde nicht gefunden."
-  [[ -n "$expected_mac" ]] || return
+  if [[ -z "$expected_mac" ]]; then
+    warn "Fuer $interface ist kein MAC-Abgleich konfiguriert; der Schnittstellenname wird verwendet."
+    return
+  fi
   [[ "$expected_mac" =~ ^([0-9a-f]{2}:){5}[0-9a-f]{2}$ ]] \
     || die "Ungueltige erwartete MAC-Adresse fuer $interface: $expected_mac"
   actual_mac="$(<"/sys/class/net/$interface/address")"
