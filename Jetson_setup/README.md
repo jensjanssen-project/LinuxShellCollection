@@ -13,6 +13,10 @@ vollständig ein. Dazu gehören:
 Das Skript lädt `pidvision-studio` bewusst nicht herunter und installiert oder
 startet keine PIDVISION-Anwendung.
 
+Für die NVIDIA-Container-Runtime richtet das Skript die offizielle
+NVIDIA-Toolkit-Paketquelle separat ein. Dadurch funktioniert die Installation
+auch auf Advantech-Images mit deaktivierten JetPack-L4T-Paketquellen.
+
 Getestetes Zielsystem ist ein NVIDIA Jetson mit Ubuntu 22.04 und mindestens
 30 GB freiem Speicher. Das Skript prüft, ob `eth5` und `eth6` vorhanden sind.
 Ein zusätzlicher MAC-Abgleich kann bei Bedarf ausdrücklich aktiviert werden.
@@ -30,7 +34,7 @@ chmod +x install-jetson.sh
 ```
 
 Für einen fest reproduzierbaren Produktiveinsatz sollte `main` in beiden URLs
-durch einen vorhandenen Release-Tag wie `v1.0.3` ersetzt werden. Dadurch wird
+durch einen vorhandenen Release-Tag wie `v1.0.4` ersetzt werden. Dadurch wird
 nicht unbemerkt eine später veränderte Version ausgeführt.
 
 Beim ersten interaktiven Lauf werden die Tailscale-Anmeldung und ein

@@ -24,7 +24,7 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 readonly SCRIPT_NAME="${0##*/}"
-readonly INSTALLER_VERSION='1.0.3'
+readonly INSTALLER_VERSION='1.0.4'
 readonly ETH5_INTERFACE="${ETH5_INTERFACE:-eth5}"
 readonly ETH6_INTERFACE="${ETH6_INTERFACE:-eth6}"
 readonly ETH5_ADDRESS="${ETH5_ADDRESS:-192.168.1.11/24}"
@@ -167,6 +167,7 @@ fi
 for backup_file in \
   /etc/docker/daemon.json \
   /etc/apt/sources.list.d/docker.list \
+  /etc/apt/sources.list.d/nvidia-container-toolkit.list \
   /etc/apt/sources.list.d/tailscale.list; do
   if [[ -e "$backup_file" ]]; then
     sudo cp -a "$backup_file" "$BACKUP_DIRECTORY/"
@@ -176,7 +177,7 @@ done
 log 'APT-Basispakete installieren'
 sudo env DEBIAN_FRONTEND=noninteractive apt-get update
 sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  ca-certificates curl dbus-x11 iproute2 nano network-manager openssh-server \
+  ca-certificates curl dbus-x11 gnupg2 iproute2 nano network-manager openssh-server \
   python3 ufw x11-utils xauth
 
 validate_cidr() {
@@ -213,6 +214,8 @@ verify_interface_identity "$ETH6_INTERFACE" "$ETH6_EXPECTED_MAC"
 log 'Netzwerk und Hardware vorab pruefen'
 for required_url in \
   https://download.docker.com/linux/ubuntu/gpg \
+  https://nvidia.github.io/libnvidia-container/gpgkey \
+  https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list \
   "https://pkgs.tailscale.com/stable/ubuntu/$VERSION_CODENAME.tailscale-keyring.list"; do
   curl --fail --silent --show-error --location --retry 2 \
     --range 0-0 --output /dev/null "$required_url" \
@@ -222,10 +225,15 @@ done
 log 'Docker-Paketquelle einrichten'
 sudo install -m 0755 -d /etc/apt/keyrings
 docker_key="$(mktemp)"
+nvidia_key_armored="$(mktemp)"
+nvidia_keyring="$nvidia_key_armored.gpg"
+nvidia_list="$(mktemp)"
 tailscale_keyring="$(mktemp)"
 tailscale_list="$(mktemp)"
 cleanup_downloads() {
-  rm -f "$docker_key" "$tailscale_keyring" "$tailscale_list"
+  rm -f \
+    "$docker_key" "$nvidia_key_armored" "$nvidia_keyring" "$nvidia_list" \
+    "$tailscale_keyring" "$tailscale_list"
 }
 trap cleanup_downloads EXIT
 
@@ -247,6 +255,22 @@ sudo install -m 0755 -d /usr/share/keyrings
 sudo install -m 0644 "$tailscale_keyring" /usr/share/keyrings/tailscale-archive-keyring.gpg
 sudo install -m 0644 "$tailscale_list" /etc/apt/sources.list.d/tailscale.list
 
+if [[ "$IS_JETSON" == '1' ]]; then
+  log 'Offizielle NVIDIA-Container-Toolkit-Paketquelle einrichten'
+  curl --fail --silent --show-error --location --retry 3 \
+    https://nvidia.github.io/libnvidia-container/gpgkey \
+    -o "$nvidia_key_armored"
+  gpg --batch --yes --dearmor --output "$nvidia_keyring" "$nvidia_key_armored"
+  curl --fail --silent --show-error --location --retry 3 \
+    https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list \
+    -o "$nvidia_list"
+  sudo install -m 0644 \
+    "$nvidia_keyring" /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+  sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' \
+    "$nvidia_list" \
+    | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list >/dev/null
+fi
+
 log 'Docker, Tailscale, Chromium und VNC-Pakete installieren'
 sudo env DEBIAN_FRONTEND=noninteractive apt-get update
 sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -262,16 +286,13 @@ sudo usermod -aG docker "$(id -un)"
 if [[ "$IS_JETSON" == '1' ]]; then
   log 'NVIDIA-Container-Runtime fuer Jetson konfigurieren'
   if ! command -v nvidia-ctk >/dev/null 2>&1; then
-    if apt-cache show nvidia-container-toolkit 2>/dev/null | grep -q '^Package:'; then
-      sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y nvidia-container-toolkit
-    else
-      warn 'nvidia-container-toolkit ist in den eingerichteten JetPack-Paketquellen nicht verfuegbar.'
-    fi
+    sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y nvidia-container-toolkit
   fi
 
-  if command -v nvidia-ctk >/dev/null 2>&1; then
-    sudo nvidia-ctk runtime configure --runtime=docker
-    sudo python3 - <<'SET_NVIDIA_DEFAULT'
+  command -v nvidia-ctk >/dev/null 2>&1 \
+    || die 'nvidia-container-toolkit wurde installiert, aber nvidia-ctk fehlt.'
+  sudo nvidia-ctk runtime configure --runtime=docker
+  sudo python3 - <<'SET_NVIDIA_DEFAULT'
 import json
 import os
 import pathlib
@@ -284,8 +305,8 @@ temporary.write_text(json.dumps(data, indent=2) + '\n')
 os.chmod(temporary, 0o644)
 os.replace(temporary, path)
 SET_NVIDIA_DEFAULT
-    sudo systemctl restart docker
-  fi
+  sudo systemctl daemon-reload
+  sudo systemctl restart docker
 fi
 
 find_connection_profile() {
