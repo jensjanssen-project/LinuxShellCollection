@@ -30,7 +30,7 @@ chmod +x install-jetson.sh
 ```
 
 Für einen fest reproduzierbaren Produktiveinsatz sollte `main` in beiden URLs
-durch einen vorhandenen Release-Tag wie `v1.0.2` ersetzt werden. Dadurch wird
+durch einen vorhandenen Release-Tag wie `v1.0.3` ersetzt werden. Dadurch wird
 nicht unbemerkt eine später veränderte Version ausgeführt.
 
 Beim ersten interaktiven Lauf werden die Tailscale-Anmeldung und ein

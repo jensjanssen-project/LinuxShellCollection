@@ -24,7 +24,7 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 readonly SCRIPT_NAME="${0##*/}"
-readonly INSTALLER_VERSION='1.0.2'
+readonly INSTALLER_VERSION='1.0.3'
 readonly ETH5_INTERFACE="${ETH5_INTERFACE:-eth5}"
 readonly ETH6_INTERFACE="${ETH6_INTERFACE:-eth6}"
 readonly ETH5_ADDRESS="${ETH5_ADDRESS:-192.168.1.11/24}"
@@ -598,7 +598,8 @@ verify_static_interface "$ETH6_INTERFACE" "$ETH6_ADDRESS"
 
 sudo docker info >/dev/null
 if [[ "$IS_JETSON" == '1' ]]; then
-  sudo docker info --format '{{json .Runtimes}}' | grep -q '"nvidia"' \
+  docker_runtime_names="$(sudo docker info --format '{{range $name, $_ := .Runtimes}}{{println $name}}{{end}}')"
+  grep -Fx 'nvidia' <<<"$docker_runtime_names" >/dev/null \
     || die 'Docker kennt die NVIDIA-Runtime nicht.'
 fi
 
