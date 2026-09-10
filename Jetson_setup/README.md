@@ -6,10 +6,12 @@ vollständig ein. Dazu gehören:
 - SSH, UFW-Grundregeln, Chromium, Docker, NVIDIA-Container-Runtime und Tailscale
 - statische IPv4-Adressen für `eth5` (`192.168.1.11/24`) und `eth6`
   (`192.168.11.110/24`), jeweils ohne Gateway und DNS
-- Klonen, Bauen und Starten von `pidvision-studio`
 - ein nur an Tailscale gebundener GNOME-VNC-Server auf Port 5901
 - Sicherungen der vorhandenen Netzwerk-, UFW- und Docker-Konfiguration
-- abschließende Prüfungen aller Dienste, Adressen, Routen und Container
+- abschließende Prüfungen aller Dienste, Adressen, Routen und der Docker-Runtime
+
+Das Skript lädt `pidvision-studio` bewusst nicht herunter und installiert oder
+startet keine PIDVISION-Anwendung.
 
 Getestetes Zielsystem ist ein NVIDIA Jetson mit Ubuntu 22.04 und mindestens
 30 GB freiem Speicher. Das Skript prüft, ob `eth5` und `eth6` vorhanden sind.
@@ -28,22 +30,8 @@ chmod +x install-jetson.sh
 ```
 
 Für einen fest reproduzierbaren Produktiveinsatz sollte `main` in beiden URLs
-durch einen vorhandenen Release-Tag wie `v1.0.1` ersetzt werden. Dadurch wird
+durch einen vorhandenen Release-Tag wie `v1.0.2` ersetzt werden. Dadurch wird
 nicht unbemerkt eine später veränderte Version ausgeführt.
-
-Das GitLab-Repository `pidvision-studio` ist nicht anonym erreichbar. Vor der
-Installation muss deshalb für den ausführenden Benutzer ein GitLab-Zugang
-vorhanden sein. Für automatische Installationen wird eine SSH-URL mit Deploy-Key
-empfohlen, beispielsweise:
-
-```bash
-APP_REPOSITORY=git@gitlab.com:pidvision/pidvision-studio.git \
-./install-jetson.sh
-```
-
-Der Deploy-Key und der geprüfte GitLab-Host-Key müssen vorher im Benutzerkonto
-eingerichtet sein; private Schlüssel gehören nicht in das öffentliche
-Installer-Repository.
 
 Beim ersten interaktiven Lauf werden die Tailscale-Anmeldung und ein
 VNC-Passwort abgefragt. Das VNC-Passwort muss 6 bis 8 Zeichen lang sein.
@@ -55,7 +43,6 @@ Für einen automatischen Lauf können sie aus nur lokal lesbaren Dateien kommen:
 
 ```bash
 chmod 600 /pfad/zu/tailscale-auth-key /pfad/zu/vnc-passwort
-APP_REPOSITORY=git@gitlab.com:pidvision/pidvision-studio.git \
 TAILSCALE_AUTH_KEY_FILE=/pfad/zu/tailscale-auth-key \
 VNC_PASSWORD_FILE=/pfad/zu/vnc-passwort \
 NONINTERACTIVE=1 \
@@ -84,17 +71,15 @@ gelten als ungetestet.
 ## Firewall und Wiederholungsläufe
 
 UFW wird standardmäßig nach dem Einrichten von SSH und VNC aktiviert. Mit
-`ENABLE_UFW=0` werden die Regeln nur gespeichert. Von Docker auf allen
-Host-Adressen veröffentlichte Ports können UFW umgehen; das Skript meldet solche
-Ports am Ende, verändert sie ohne Kenntnis der PIDVISION-Anforderungen aber
-nicht automatisch.
+`ENABLE_UFW=0` werden die Regeln nur gespeichert. Später von Docker auf allen
+Host-Adressen veröffentlichte Anwendungsports können UFW umgehen und müssen bei
+der separaten Anwendungsinstallation berücksichtigt werden.
 
 Vorhandene Konfigurationen werden unter
 `/var/backups/pidvision-installer/<zeitstempel>` gesichert. Das vollständige
 Protokoll liegt unter `/var/log/pidvision-install-<zeitstempel>.log` und ist nur
 für root lesbar.
 
-Ein erneuter Lauf aktualisiert ein sauberes `pidvision-studio`-Repository und
-baut die Container neu. Lokale Änderungen im Repository werden nicht
-überschrieben. Mit `SKIP_APP_BUILD=1` oder `SKIP_VNC=1` lassen sich diese Schritte
-gezielt auslassen. Alle Einstellungen zeigt `./install-jetson.sh --help`.
+Ein erneuter Lauf überprüft und aktualisiert die Systemkonfiguration, ohne eine
+Anwendung zu installieren. Mit `SKIP_VNC=1` lässt sich die VNC-Einrichtung
+auslassen. Alle Einstellungen zeigt `./install-jetson.sh --help`.

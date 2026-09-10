@@ -10,14 +10,11 @@
 #   ETH6_ADDRESS=192.168.11.110/24
 #   ETH5_EXPECTED_MAC=aa:bb:cc:dd:ee:ff    # optionaler Port-Abgleich
 #   ETH6_EXPECTED_MAC=11:22:33:44:55:66    # optionaler Port-Abgleich
-#   APP_REPOSITORY=https://gitlab.com/pidvision/pidvision-studio.git
-#   APP_DIRECTORY="$HOME/repos/pidvision-studio"
 #   TAILSCALE_AUTH_KEY=tskey-auth-...       # fuer unbeaufsichtigte Anmeldung
 #   TAILSCALE_AUTH_KEY_FILE=/sicherer/pfad  # Alternative zur Variable
 #   VNC_PASSWORD=geheim                     # 6 bis 8 Zeichen
 #   VNC_PASSWORD_FILE=/sicherer/pfad        # Alternative zur Variable
 #   NONINTERACTIVE=1                        # bei fehlenden Geheimnissen abbrechen
-#   SKIP_APP_BUILD=1                        # Repository nicht bauen/starten
 #   SKIP_VNC=1                              # VNC nicht einrichten
 #   ENABLE_UFW=0                            # UFW-Regeln anlegen, aber nicht aktivieren
 #   MIN_FREE_GB=30                          # benoetigter freier Speicher
@@ -27,17 +24,14 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 readonly SCRIPT_NAME="${0##*/}"
-readonly INSTALLER_VERSION='1.0.1'
+readonly INSTALLER_VERSION='1.0.2'
 readonly ETH5_INTERFACE="${ETH5_INTERFACE:-eth5}"
 readonly ETH6_INTERFACE="${ETH6_INTERFACE:-eth6}"
 readonly ETH5_ADDRESS="${ETH5_ADDRESS:-192.168.1.11/24}"
 readonly ETH6_ADDRESS="${ETH6_ADDRESS:-192.168.11.110/24}"
 readonly ETH5_EXPECTED_MAC="${ETH5_EXPECTED_MAC:-}"
 readonly ETH6_EXPECTED_MAC="${ETH6_EXPECTED_MAC:-}"
-readonly APP_REPOSITORY="${APP_REPOSITORY:-https://gitlab.com/pidvision/pidvision-studio.git}"
-readonly APP_DIRECTORY="${APP_DIRECTORY:-$HOME/repos/pidvision-studio}"
 readonly NONINTERACTIVE="${NONINTERACTIVE:-0}"
-readonly SKIP_APP_BUILD="${SKIP_APP_BUILD:-0}"
 readonly SKIP_VNC="${SKIP_VNC:-0}"
 readonly ENABLE_UFW="${ENABLE_UFW:-1}"
 readonly MIN_FREE_GB="${MIN_FREE_GB:-30}"
@@ -83,7 +77,7 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
 fi
 [[ $# -eq 0 ]] || die "Unbekannte Option: $1 (Hilfe: ./$SCRIPT_NAME --help)"
 
-for boolean_setting in NONINTERACTIVE SKIP_APP_BUILD SKIP_VNC ENABLE_UFW ALLOW_UNTESTED_SYSTEM; do
+for boolean_setting in NONINTERACTIVE SKIP_VNC ENABLE_UFW ALLOW_UNTESTED_SYSTEM; do
   boolean_value="${!boolean_setting}"
   [[ "$boolean_value" == '0' || "$boolean_value" == '1' ]] \
     || die "$boolean_setting muss 0 oder 1 sein."
@@ -182,7 +176,7 @@ done
 log 'APT-Basispakete installieren'
 sudo env DEBIAN_FRONTEND=noninteractive apt-get update
 sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  ca-certificates curl dbus-x11 git iproute2 make nano network-manager openssh-server \
+  ca-certificates curl dbus-x11 iproute2 nano network-manager openssh-server \
   python3 ufw x11-utils xauth
 
 validate_cidr() {
@@ -216,25 +210,14 @@ verify_interface_identity() {
 verify_interface_identity "$ETH5_INTERFACE" "$ETH5_EXPECTED_MAC"
 verify_interface_identity "$ETH6_INTERFACE" "$ETH6_EXPECTED_MAC"
 
-log 'Netzwerk, Hardware und Git-Zugriff vorab pruefen'
+log 'Netzwerk und Hardware vorab pruefen'
 for required_url in \
   https://download.docker.com/linux/ubuntu/gpg \
-  "https://pkgs.tailscale.com/stable/ubuntu/$VERSION_CODENAME.tailscale-keyring.list" \
-  https://gitlab.com/; do
+  "https://pkgs.tailscale.com/stable/ubuntu/$VERSION_CODENAME.tailscale-keyring.list"; do
   curl --fail --silent --show-error --location --retry 2 \
     --range 0-0 --output /dev/null "$required_url" \
     || die "Nicht erreichbar: $required_url"
 done
-
-if [[ "$SKIP_APP_BUILD" != '1' ]]; then
-  if [[ "$NONINTERACTIVE" == '1' ]]; then
-    GIT_TERMINAL_PROMPT=0 git ls-remote "$APP_REPOSITORY" HEAD >/dev/null \
-      || die 'Kein Zugriff auf APP_REPOSITORY. Fuer GitLab einen Deploy-Key/eine SSH-URL einrichten.'
-  else
-    git ls-remote "$APP_REPOSITORY" HEAD >/dev/null \
-      || die 'Kein Zugriff auf APP_REPOSITORY. GitLab-Zugang oder APP_REPOSITORY pruefen.'
-  fi
-fi
 
 log 'Docker-Paketquelle einrichten'
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -393,32 +376,6 @@ TAILSCALE_IP="$(tailscale ip -4 | head -n 1)"
 validate_cidr "$TAILSCALE_IP/32"
 TAILSCALE_KEY=''
 TAILSCALE_KEY_FILE_PATH=''
-
-install_pidvision_app() {
-  log 'pidvision-studio beziehen und aktualisieren'
-  mkdir -p "$(dirname "$APP_DIRECTORY")"
-  if [[ ! -e "$APP_DIRECTORY" ]]; then
-    git clone "$APP_REPOSITORY" "$APP_DIRECTORY"
-  elif [[ -d "$APP_DIRECTORY/.git" ]]; then
-    current_origin="$(git -C "$APP_DIRECTORY" remote get-url origin 2>/dev/null || true)"
-    [[ "$current_origin" == "$APP_REPOSITORY" ]] \
-      || die "$APP_DIRECTORY verwendet einen anderen Git-Origin: $current_origin"
-    if [[ -z "$(git -C "$APP_DIRECTORY" status --porcelain)" ]]; then
-      git -C "$APP_DIRECTORY" pull --ff-only
-    else
-      warn "$APP_DIRECTORY enthaelt lokale Aenderungen und wurde deshalb nicht aktualisiert."
-    fi
-  else
-    die "$APP_DIRECTORY existiert bereits, ist aber kein Git-Repository."
-  fi
-
-  log 'pidvision-studio fuer Jetson bauen und starten'
-  (
-    cd "$APP_DIRECTORY"
-    sg docker -c 'make build-jetson'
-    sg docker -c 'make up-jetson'
-  )
-}
 
 if [[ "$SKIP_VNC" != '1' ]]; then
   log 'Headless-GNOME-VNC einrichten'
@@ -600,12 +557,6 @@ else
   warn 'ENABLE_UFW=0: UFW-Regeln wurden angelegt, die Firewall aber nicht aktiviert.'
 fi
 
-if [[ "$SKIP_APP_BUILD" != '1' ]]; then
-  install_pidvision_app
-else
-  warn 'SKIP_APP_BUILD=1: pidvision-studio wurde nicht gebaut oder gestartet.'
-fi
-
 log 'Installation und Dienste pruefen'
 for system_service in ssh docker tailscaled; do
   sudo systemctl is-enabled --quiet "$system_service" \
@@ -671,34 +622,12 @@ if [[ "$ENABLE_UFW" == '1' ]]; then
   sudo env LC_ALL=C ufw status | grep -q '^Status: active' || die 'UFW ist nicht aktiv.'
 fi
 
-if [[ "$SKIP_APP_BUILD" != '1' ]]; then
-  running_containers="$(sg docker -c "docker ps -q" | wc -l | tr -d ' ')"
-  (( running_containers > 0 )) || die 'Nach make up-jetson laeuft kein Docker-Container.'
-
-  container_status="$(sg docker -c "docker ps --format '{{.Names}}\\t{{.Status}}'")"
-  printf '\nLaufende Container:\n%s\n' "$container_status"
-  if grep -qi 'unhealthy' <<<"$container_status"; then
-    die 'Mindestens ein PIDVISION-Container ist unhealthy.'
-  elif grep -qi 'health: starting' <<<"$container_status"; then
-    warn 'Mindestens ein Container fuehrt seinen Healthcheck noch aus. Bitte den Status spaeter erneut pruefen.'
-  fi
-
-  published_ports="$(sg docker -c "docker ps --format '{{.Names}}\\t{{.Ports}}'")"
-  if grep -Eq '0\.0\.0\.0:|\[::\]:' <<<"$published_ports"; then
-    warn 'Mindestens ein Docker-Port ist auf allen Schnittstellen veroeffentlicht. UFW allein schuetzt diese Ports nicht:'
-    printf '%s\n' "$published_ports"
-  fi
-fi
-
 log 'Installation abgeschlossen'
 printf 'Statische Netze:  %s = %s, %s = %s\n' \
   "$ETH5_INTERFACE" "$ETH5_ADDRESS" "$ETH6_INTERFACE" "$ETH6_ADDRESS"
 printf 'Tailscale-IP:      %s\n' "$TAILSCALE_IP"
 if [[ "$SKIP_VNC" != '1' ]]; then
   printf 'VNC-Adresse:       vnc://%s:5901\n' "$TAILSCALE_IP"
-fi
-if [[ "$SKIP_APP_BUILD" != '1' ]]; then
-  printf 'PIDVISION-Ordner:  %s\n' "$APP_DIRECTORY"
 fi
 printf 'Sicherung:         %s\n' "$BACKUP_DIRECTORY"
 printf 'Installationslog:  %s\n' "$INSTALL_LOG"

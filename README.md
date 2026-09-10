@@ -73,7 +73,8 @@ sudo ./Ubuntu24_complete.sh
 ## Advantech Jetson PIDVISION Complete Setup
 Das Skript muss als normaler Desktop-Benutzer und nicht mit `sudo bash`
 ausgeführt werden. Es richtet Docker, NVIDIA Container Runtime, Tailscale,
-statische Netzwerke, VNC und `pidvision-studio` ein.
+statische Netzwerke und VNC ein. `pidvision-studio` wird dabei nicht
+heruntergeladen oder installiert.
 
 ```bash
 wget "https://raw.githubusercontent.com/jensjanssen-project/LinuxShellCollection/main/Jetson_setup/install-jetson.sh"
