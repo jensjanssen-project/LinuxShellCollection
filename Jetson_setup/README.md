@@ -6,8 +6,8 @@ vollständig ein. Dazu gehören:
 - SSH, UFW-Grundregeln, Chromium, Docker, NVIDIA-Container-Runtime und Tailscale
 - statische IPv4-Adressen für `eth5` (`192.168.1.1/24`) und `eth6`
   (`192.168.11.110/24`), jeweils ohne Gateway und DNS
-- auf Kamera-IP und Schnittstelle beschränkte UFW-Freigaben für die
-  Orbbec-PoE-Kamera (`3956/udp`, `20000/udp` und `20100/udp`)
+- eine auf Kamera-IP, Host-IP und Schnittstelle beschränkte UDP-Freigabe für
+  die Orbbec-PoE-Kamera
 - ein nur an Tailscale gebundener GNOME-VNC-Server auf Port 5901
 - Sicherungen der vorhandenen Netzwerk-, UFW- und Docker-Konfiguration
 - abschließende Prüfungen aller Dienste, Adressen, Routen und der Docker-Runtime
@@ -36,7 +36,7 @@ chmod +x install-jetson.sh
 ```
 
 Für einen fest reproduzierbaren Produktiveinsatz sollte `main` in beiden URLs
-durch einen vorhandenen Release-Tag wie `v1.0.6` ersetzt werden. Dadurch wird
+durch einen vorhandenen Release-Tag wie `v1.0.7` ersetzt werden. Dadurch wird
 nicht unbemerkt eine später veränderte Version ausgeführt.
 
 Beim ersten interaktiven Lauf werden die Tailscale-Anmeldung und ein
@@ -81,25 +81,21 @@ UFW wird standardmäßig nach dem Einrichten von SSH und VNC aktiviert. Mit
 Host-Adressen veröffentlichte Anwendungsports können UFW umgehen und müssen bei
 der separaten Anwendungsinstallation berücksichtigt werden.
 
-Für die Orbbec-PoE-Kamera wird eingehender UDP-Verkehr von `192.168.1.10:3956`
-auf die erste statische Host-Adresse erlaubt. Der Zielport dieser Regel ist
-absichtlich nicht fest vorgegeben: Das Orbbec SDK verwendet für seine lokalen
-Antworten dynamische UDP-Ports. Die Bilddatenströme werden zusätzlich gezielt
-auf `20000/udp` und `20100/udp` freigegeben. Alle drei Regeln gelten nur für die
-bekannte Kamera-IP und die konfigurierte Kamera-Schnittstelle.
+Für die Orbbec-PoE-Kamera wird eingehender UDP-Verkehr von `192.168.1.10` auf
+die erste statische Host-Adresse erlaubt. Eine Einschränkung auf einzelne Ports
+ist hier nicht zuverlässig: Neben den Bilddatenströmen auf `20000/udp` und
+`20100/udp` verwendet das Orbbec SDK auch dynamische lokale UDP-Ports. Die
+Freigabe bleibt eng auf die bekannte Kamera-IP, die statische Host-IP und die
+dedizierte Kamera-Schnittstelle beschränkt.
 
 Der in PIDVISION konfigurierte Kamera-Port `8090/tcp` ist der Steuerkanal vom
 Jetson zur Kamera. Da UFW ausgehende Verbindungen standardmäßig erlaubt, ist
 dafür keine eingehende Freigabe auf dem Jetson erforderlich.
 
-Bei einer abweichenden Kamera-IP oder einem anderen UDP-Quellport können die
-Werte beim Start angepasst werden:
+Bei einer abweichenden Kamera-IP kann der Wert beim Start angepasst werden:
 
 ```bash
 ORBBEC_CAMERA_IP=192.168.1.20 \
-ORBBEC_UDP_SOURCE_PORT=3956 \
-ORBBEC_COLOR_UDP_PORT=20000 \
-ORBBEC_DEPTH_UDP_PORT=20100 \
 ./install-jetson.sh
 ```
 

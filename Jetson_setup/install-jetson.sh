@@ -9,9 +9,6 @@
 #   ETH5_ADDRESS=192.168.1.1/24
 #   ETH6_ADDRESS=192.168.11.110/24
 #   ORBBEC_CAMERA_IP=192.168.1.10         # PoE-Kamera am ersten statischen Netz
-#   ORBBEC_UDP_SOURCE_PORT=3956            # SDK-Antworten an dynamische Zielports
-#   ORBBEC_COLOR_UDP_PORT=20000            # erster Bilddatenstrom
-#   ORBBEC_DEPTH_UDP_PORT=20100            # zweiter Bilddatenstrom
 #   ETH5_EXPECTED_MAC=aa:bb:cc:dd:ee:ff    # optionaler Port-Abgleich
 #   ETH6_EXPECTED_MAC=11:22:33:44:55:66    # optionaler Port-Abgleich
 #   TAILSCALE_AUTH_KEY=tskey-auth-...       # fuer unbeaufsichtigte Anmeldung
@@ -28,15 +25,12 @@ set -Eeuo pipefail
 IFS=$'\n\t'
 
 readonly SCRIPT_NAME="${0##*/}"
-readonly INSTALLER_VERSION='1.0.6'
+readonly INSTALLER_VERSION='1.0.7'
 readonly ETH5_INTERFACE="${ETH5_INTERFACE:-eth5}"
 readonly ETH6_INTERFACE="${ETH6_INTERFACE:-eth6}"
 readonly ETH5_ADDRESS="${ETH5_ADDRESS:-192.168.1.1/24}"
 readonly ETH6_ADDRESS="${ETH6_ADDRESS:-192.168.11.110/24}"
 readonly ORBBEC_CAMERA_IP="${ORBBEC_CAMERA_IP:-192.168.1.10}"
-readonly ORBBEC_UDP_SOURCE_PORT="${ORBBEC_UDP_SOURCE_PORT:-3956}"
-readonly ORBBEC_COLOR_UDP_PORT="${ORBBEC_COLOR_UDP_PORT:-20000}"
-readonly ORBBEC_DEPTH_UDP_PORT="${ORBBEC_DEPTH_UDP_PORT:-20100}"
 readonly ETH5_EXPECTED_MAC="${ETH5_EXPECTED_MAC:-}"
 readonly ETH6_EXPECTED_MAC="${ETH6_EXPECTED_MAC:-}"
 readonly NONINTERACTIVE="${NONINTERACTIVE:-0}"
@@ -204,19 +198,6 @@ import ipaddress
 import sys
 ipaddress.IPv4Address(sys.argv[1])
 PY
-validate_port() {
-  local port=$1
-  local variable_name=$2
-  if [[ ! "$port" =~ ^[0-9]+$ ]] \
-    || (( 10#$port < 1 || 10#$port > 65535 )); then
-    die "$variable_name muss zwischen 1 und 65535 liegen."
-  fi
-}
-
-validate_port "$ORBBEC_UDP_SOURCE_PORT" ORBBEC_UDP_SOURCE_PORT
-validate_port "$ORBBEC_COLOR_UDP_PORT" ORBBEC_COLOR_UDP_PORT
-validate_port "$ORBBEC_DEPTH_UDP_PORT" ORBBEC_DEPTH_UDP_PORT
-
 verify_interface_identity() {
   local interface=$1
   local expected_mac=${2,,}
@@ -404,20 +385,15 @@ log 'Statische Netze konfigurieren (ohne Gateway und DNS)'
 configure_static_interface "$ETH5_INTERFACE" "$ETH5_ADDRESS"
 configure_static_interface "$ETH6_INTERFACE" "$ETH6_ADDRESS"
 
-# Das Orbbec SDK waehlt fuer seine lokalen UDP-Antworten dynamische Ports. Die
-# beiden Bilddatenstroeme verwenden dagegen feste Quell- und Zielports. Alle
-# Freigaben bleiben auf Schnittstelle, Kamera-IP und Host-IP beschraenkt.
+# Das Orbbec SDK nutzt neben festen Streamports auch dynamische UDP-Zielports.
+# Daher wird UDP vollstaendig erlaubt, aber eng auf die dedizierte Schnittstelle,
+# die Kamera-IP und die statische Host-IP beschraenkt.
 ORBBEC_HOST_IP="${ETH5_ADDRESS%/*}"
 readonly ORBBEC_HOST_IP
 log 'Orbbec-PoE-Kamera in UFW freigeben'
 sudo ufw allow in on "$ETH5_INTERFACE" proto udp \
-  from "$ORBBEC_CAMERA_IP" port "$ORBBEC_UDP_SOURCE_PORT" \
+  from "$ORBBEC_CAMERA_IP" \
   to "$ORBBEC_HOST_IP" comment 'Orbbec PoE camera'
-for stream_port in "$ORBBEC_COLOR_UDP_PORT" "$ORBBEC_DEPTH_UDP_PORT"; do
-  sudo ufw allow in on "$ETH5_INTERFACE" proto udp \
-    from "$ORBBEC_CAMERA_IP" port "$stream_port" \
-    to "$ORBBEC_HOST_IP" port "$stream_port" comment 'Orbbec PoE stream'
-done
 
 log 'Tailscale anmelden'
 if ! tailscale ip -4 >/dev/null 2>&1; then
@@ -688,10 +664,8 @@ fi
 log 'Installation abgeschlossen'
 printf 'Statische Netze:  %s = %s, %s = %s\n' \
   "$ETH5_INTERFACE" "$ETH5_ADDRESS" "$ETH6_INTERFACE" "$ETH6_ADDRESS"
-printf 'Orbbec-Freigabe:   %s:%s/udp -> %s auf %s\n' \
-  "$ORBBEC_CAMERA_IP" "$ORBBEC_UDP_SOURCE_PORT" "$ORBBEC_HOST_IP" "$ETH5_INTERFACE"
-printf 'Orbbec-Streams:    %s/udp und %s/udp\n' \
-  "$ORBBEC_COLOR_UDP_PORT" "$ORBBEC_DEPTH_UDP_PORT"
+printf 'Orbbec-Freigabe:   UDP von %s -> %s auf %s\n' \
+  "$ORBBEC_CAMERA_IP" "$ORBBEC_HOST_IP" "$ETH5_INTERFACE"
 printf 'Tailscale-IP:      %s\n' "$TAILSCALE_IP"
 if [[ "$SKIP_VNC" != '1' ]]; then
   printf 'VNC-Adresse:       vnc://%s:5901\n' "$TAILSCALE_IP"
