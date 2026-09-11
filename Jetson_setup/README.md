@@ -6,6 +6,8 @@ vollständig ein. Dazu gehören:
 - SSH, UFW-Grundregeln, Chromium, Docker, NVIDIA-Container-Runtime und Tailscale
 - statische IPv4-Adressen für `eth5` (`192.168.1.11/24`) und `eth6`
   (`192.168.11.110/24`), jeweils ohne Gateway und DNS
+- eine auf Kamera-IP, Schnittstelle und UDP-Quellport beschränkte UFW-Freigabe
+  für die Orbbec-PoE-Kamera (`192.168.1.10`, UDP-Quellport `3956`)
 - ein nur an Tailscale gebundener GNOME-VNC-Server auf Port 5901
 - Sicherungen der vorhandenen Netzwerk-, UFW- und Docker-Konfiguration
 - abschließende Prüfungen aller Dienste, Adressen, Routen und der Docker-Runtime
@@ -34,7 +36,7 @@ chmod +x install-jetson.sh
 ```
 
 Für einen fest reproduzierbaren Produktiveinsatz sollte `main` in beiden URLs
-durch einen vorhandenen Release-Tag wie `v1.0.4` ersetzt werden. Dadurch wird
+durch einen vorhandenen Release-Tag wie `v1.0.5` ersetzt werden. Dadurch wird
 nicht unbemerkt eine später veränderte Version ausgeführt.
 
 Beim ersten interaktiven Lauf werden die Tailscale-Anmeldung und ein
@@ -78,6 +80,25 @@ UFW wird standardmäßig nach dem Einrichten von SSH und VNC aktiviert. Mit
 `ENABLE_UFW=0` werden die Regeln nur gespeichert. Später von Docker auf allen
 Host-Adressen veröffentlichte Anwendungsports können UFW umgehen und müssen bei
 der separaten Anwendungsinstallation berücksichtigt werden.
+
+Für die Orbbec-PoE-Kamera wird eingehender UDP-Verkehr von `192.168.1.10:3956`
+auf die erste statische Host-Adresse erlaubt. Der Zielport ist absichtlich nicht
+fest vorgegeben: Das Orbbec SDK handelt für jeden Verbindungsversuch einen neuen
+dynamischen lokalen UDP-Port aus. Die Regel gilt trotzdem nur für die bekannte
+Kamera-IP, ihren festen Quellport und die konfigurierte Kamera-Schnittstelle.
+
+Bei einer abweichenden Kamera-IP oder einem anderen UDP-Quellport können die
+Werte beim Start angepasst werden:
+
+```bash
+ORBBEC_CAMERA_IP=192.168.1.20 \
+ORBBEC_UDP_SOURCE_PORT=3956 \
+./install-jetson.sh
+```
+
+Die Kamera-Schnittstelle und Host-IP folgen `ETH5_INTERFACE` und `ETH5_ADDRESS`.
+Auf dem aktuell eingerichteten Jetson ist das beispielsweise `eth1` und
+`192.168.1.11/24`, wenn der Installer mit `ETH5_INTERFACE=eth1` gestartet wird.
 
 Vorhandene Konfigurationen werden unter
 `/var/backups/pidvision-installer/<zeitstempel>` gesichert. Das vollständige
